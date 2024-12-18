@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fayl Yuborish Tizimi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .loading-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Step 1: Field Selection -->
+        <div id="step1" class="step active">
+            <h2>Yo'nalishni tanlang</h2>
+            <select id="fieldSelect">
+                <option value="">Yo'nalishni tanlang</option>
+                <option value="Islomshunoslik">Islomshunoslik</option>
+                <option value="Dinshunoslik">Dinshunoslik</option>
+                <option value="Psixologiya">Psixologiya</option>
+                <option value="Turizm">Turizm</option>
+                <option value="Axborot Xavfsizligi">Axborot Xavfsizligi</option>
+                <option value="Islom Huquqi">Islom Huquqi</option>
+                <option value="Tashqi Iqtisod">Tashqi Iqtisod</option>
+                <option value="Iqtisodiyot">Iqtisodiyot</option>
+                <option value="Xalqaro Munosabatlar">Xalqaro Munosabatlar</option>
+                <option value="Matnshunoslik">Matnshunoslik</option>
+                <option value="Lingvistika">Lingvistika</option>
+                <option value="Tarix">Tarix</option>
+            </select>
+            <div class="navigation">
+                <button id="next1" disabled>Keyingisi</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Full Name Selection -->
+        <div id="step2" class="step">
+            <h2>Familiyangizni tanlang</h2>
+            <select id="nameSelect">
+                <option value="">Familiyani tanlang</option>
+            </select>
+            <div class="navigation">
+                <button id="prev2">Orqaga</button>
+                <button id="next2" disabled>Keyingisi</button>
+            </div>
+        </div>
+
+        <!-- Step 3: File Type Selection -->
+        <div id="step3" class="step">
+            <h2>Fayl turini tanlang</h2>
+            <select id="fileTypeSelect">
+                <option value="">Fayl turini tanlang</option>
+                <option value="Obyektivka">Obyektivka</option>
+                <option value="Hisobot">Hisobot</option>
+                <option value="Xatlar">Xatlar</option>
+            </select>
+            <div class="navigation">
+                <button id="prev3">Orqaga</button>
+                <button id="next3" disabled>Keyingisi</button>
+            </div>
+        </div>
+
+        <!-- Step 4: File Upload -->
+        <div id="step4" class="step">
+            <h2>Faylni yuklang</h2>
+            <input type="file" id="fileUpload">
+            <div class="navigation">
+                <button id="prev4">Orqaga</button>
+                <button id="submitFile">Faylni yuborish</button>
+            </div>
+        </div>
+    </div>
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <p>Iltimos, kuting. Faylingiz yuborilmoqda...</p>
+        </div>
+    </div>
+    <script>
+        // Mapping of fields to fullnames (mock data)
+        const fieldToNames = {
+            "Islomshunoslik": ["Lapasov Muxammadsodiq", "Sharopov Sarvar Faxriddinovich", "Fozilova Muslimaxon", "Jamolova Ra'no", "Axmadjonov Ismatillo", "Turdimirzayeva Irodaxon", "Yodgorova Soliha", "Azizova Marjonabonu", "Nazimjonova Dilzoda", "Yuldasheva Dilfuza", "Yakuboya Ziyoda", "Alimov Muhammadali", "Tavakkaljonova Ruqiya", "Saminov Muxammadsodiq", "Musayeva Munisxon", "Kenjayev Nodirbek", "Abdumutaliyev Nodir", "Gulmatov Muhammad", "Ergasheva Zilola", "Panjiyeva Marjona"],
+            "Dinshunoslik": ["Muftillayev Luqmonjon", "Tuliyev Valijon", "Narziyeva Muxabbat", "To‘xtanazarov Muhammadjon", "Karimov Muhriddin", "Xaitov Mirzobek", "Muxammatdinov Aǵzammatdin", "Abdug‘offorov Jasurbek", "Boymuxammedov Raxmatillo", "Xalimjonova Nozimaxon", "Rahimov Yosinbek", "Jo'raqulov Shokirjon", "Komiljonov", "Shavqotulloyev Ibodulloh", "Otajonov Ziyomuhammad", "Onorboyeva Ma'mura", "Avliyoxonov"],
+            "Psixologiya": ["Maxmudova Munisaxon", "O‘ktamova Nihola", "Umarova Maftuna", "Sadirova Zumrad", "Xudayberdiyeva Dilobar", "Ibroximova Nasiba", "Axrorova Zebo", "Hasanova Barnoxon", "Temirova Layloxon", "Jonibekova Xusniyobonu", "Zarpullayev Kamol"],
+            "Turizm":["Rasulova Xonzodabegim", "Azizova Sug‘diyona", "Ibragimova Mohigul", "Bosimova Nafisaxon", "Usmonova Shohida", "Xoshimova Dilnoza"],
+            "Axborot Xavfsizligi": ["Obidinov Abdurahmonjon", "Rustamova Munavvarxon"],
+            "Islom Huquqi": ["Yokubjanov Abdurashid", "Shukurova Shaxrizoda", "Abdupattayev Muxammadamin", "Olimjonov Xusanjon", "Saidakramov Saidazimxon", "Abdreymov Nurbol", "Raximov Elyor", "Kurbanov Xayrulla", "Pormanov Bobosher", "Komilova Maloxat"],
+            "Tashqi Iqtisod": ["Ilxomov Elyor", "Saparova Iroda", "Shamansurova Munisa", "Nuriddinova Shodiyaxon"],
+            "Iqtisodiyot": ["Qarshiboyev Anvar", "Qodirova Gulufar", "Qosimova Nargiza", "Orifjonov Maxammadjon", "Abdulxakimov Abdulloh", "Ahmadova Shahlo", "Nurullayeva Lobarxon"],
+            "Xalqaro Munosabatlar": ["Dalimirzayev Javoxir", "Abduvoitov Shoxruxxon", "Nurmuxamatov Javohir", "Xolmatov Saidbek", "Idrisov Abduljamil", "Halimova Madinabonu"],
+            "Matnshunoslik": ["Turg‘unov Nuriddin", "Saidmalik Maryam", "Qo‘chqarova Musallamoy", "Ergashev Abdulvosi", "Xayrulloyev Saidjon", "Umarjonov Umidjon", "Karimov Muxammadamin", "Ergashev Shoislom", "Mamadaliyev Otabek", "Po‘latova Shaxzodaxon", "Baxtiyorova E'zozaxon", "Abdinazarova Dildora", "Abdujalilov Hamidullo"],
+            "Lingvistika": ["Rasulova Zebiniso", "Axtamova Aziza", "Maxamadjonova Moxichexra", "Masharifov Doniyor", "Mamirov Asadbek", "Yusupova Dilorom", "Ilyosova Munisa", "Rajapboyeva Dildora", "Rustamova Sharifa", "Kamoldinova Muqaddasxon", "Alimkulov No'monjon", "Saidkarimova E'zozaxon"],
+            "Tarix": ["Qosimov Jaxongir", "Soibjonova Samiya", "Jabborova Oydin", "Zubaydullayeva Zarina", "G‘ulomov Fayzullo", "Xakimjonov Dilmurod", "Abdiqodirov Muxammadamin", "Asrolmirzayev Isoqjon", "Quvvatova Maftunabonu", "Po‘latova Umidaxon", "Soliyeva Gulxayo", "Saidkulov Aliaskar"]
+        };
+
+        // Telegram Bot Configuration
+        const TELEGRAM_BOT_TOKEN = '7765541043:AAHDPBTNvGZrRLFNs1w7l8rg1ECCQp21Apk';
+        const TARGET_CHAT_ID = '-1002446713561';
+
+        // Field to Topic ID Mapping
+        const FIELD_TO_TOPIC = {
+            "Islomshunoslik": 23,
+            "Dinshunoslik": 25,
+            "Psixologiya": 30,
+            "Turizm": 35,
+            "Axborot Xavfsizligi": 34,
+            "Islom Huquqi": 33,
+            "Tashqi Iqtisod": 32,
+            "Iqtisodiyot": 31,
+            "Xalqaro Munosabatlar": 29,
+            "Matnshunoslik": 28,
+            "Lingvistika": 27,
+            "Tarix": 26
+        };
+
+        // State management
+        let selectedField = '';
+        let selectedName = '';
+        let selectedFileType = '';
+        let selectedFile = null;
+
+        // Step 1: Field Selection
+        const fieldSelect = document.getElementById('fieldSelect');
+        const next1 = document.getElementById('next1');
+
+        fieldSelect.addEventListener('change', () => {
+            selectedField = fieldSelect.value;
+            next1.disabled = !selectedField;
+
+            // Populate names for the selected field
+            const nameSelect = document.getElementById('nameSelect');
+            nameSelect.innerHTML = '<option value="">Familiyani tanlang</option>';
+            fieldToNames[selectedField].forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                nameSelect.appendChild(option);
+            });
+        });
+
+        next1.addEventListener('click', () => {
+            document.getElementById('step1').classList.remove('active');
+            document.getElementById('step2').classList.add('active');
+        });
+
+        // Step 2: Name Selection
+        const nameSelect = document.getElementById('nameSelect');
+        const next2 = document.getElementById('next2');
+        const prev2 = document.getElementById('prev2');
+
+        nameSelect.addEventListener('change', () => {
+            selectedName = nameSelect.value;
+            next2.disabled = !selectedName;
+        });
+
+        next2.addEventListener('click', () => {
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('step3').classList.add('active');
+        });
+
+        prev2.addEventListener('click', () => {
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('step1').classList.add('active');
+        });
+
+        // Step 3: File Type Selection
+        const fileTypeSelect = document.getElementById('fileTypeSelect');
+        const next3 = document.getElementById('next3');
+        const prev3 = document.getElementById('prev3');
+
+        fileTypeSelect.addEventListener('change', () => {
+            selectedFileType = fileTypeSelect.value;
+            next3.disabled = !selectedFileType;
+        });
+
+        next3.addEventListener('click', () => {
+            document.getElementById('step3').classList.remove('active');
+            document.getElementById('step4').classList.add('active');
+        });
+
+        prev3.addEventListener('click', () => {
+            document.getElementById('step3').classList.remove('active');
+            document.getElementById('step2').classList.add('active');
+        });
+
+        // Step 4: File Upload
+        const fileUpload = document.getElementById('fileUpload');
+        const submitFile = document.getElementById('submitFile');
+        const prev4 = document.getElementById('prev4');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        fileUpload.addEventListener('change', (e) => {
+            selectedFile = e.target.files[0];
+        });
+
+        prev4.addEventListener('click', () => {
+            document.getElementById('step4').classList.remove('active');
+            document.getElementById('step3').classList.add('active');
+        });
+
+        submitFile.addEventListener('click', async () => {
+            if (!selectedFile) {
+                alert('Iltimos, faylni tanlang');
+                return;
+            }
+            submitFile.disabled = true;
+            loadingOverlay.style.display = 'flex';
+
+            try {
+                const formData = new FormData();
+                formData.append('document', selectedFile);
+                formData.append('chat_id', TARGET_CHAT_ID);
+                formData.append('topic_id', FIELD_TO_TOPIC[selectedField]);
+                formData.append('caption', `Fayl jo'natuvchisi: ${selectedName}\n#${selectedFileType}`);
+
+                const response = await fetch(' http://192.168.179.7:50005/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                loadingOverlay.style.display = 'none';
+                if (result.ok) {
+                    alert('Fayl muvaffaqiyatli yuborildi!');
+                    // Reset form or redirect
+                    window.location.reload();
+                } else {
+                    submitFile.disabled = false;
+                    alert('Faylni yuborishda xatolik: ' + result.description);
+                }
+            } catch (error) {
+                loadingOverlay.style.display = 'none';
+                submitFile.disabled = false;
+                console.error('Xatolik:', error);
+                alert('Faylni yuborishda muammo yuz berdi');
+            }
+        });
+    </script>
+</body>
+</html>
