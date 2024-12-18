@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
-TELEGRAM_BOT_TOKEN = '7765541043:AAHDPBTNvGZrRLFNs1w7l8rg1ECCQp21Apk'
+TELEGRAM_BOT_TOKEN = '7668097476:AAFEQa-3G4L8syFfXDTC-jCLY0gqb8YjrO4'
 TARGET_CHAT_ID = '-1002446713561'
 
 @app.route('/upload', methods=['POST'])
